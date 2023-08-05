@@ -21,6 +21,7 @@ model User {
   refreshToken String?
   facebookId String?
   googleId String?
+  role String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
