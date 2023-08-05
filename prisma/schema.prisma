@@ -17,8 +17,8 @@ model User {
   firstName String?
   lastName String?
   passwordHash String
-  accessToken String?
-  refreshToken String?
+  accessToken String? @unique
+  refreshToken String? @unique
   facebookId String?
   googleId String?
   role String?
