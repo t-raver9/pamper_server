@@ -13,7 +13,7 @@ const app: Express = express();
 const prisma = new PrismaClient();
 
 app.use(passport.initialize());
-app.use(cors({ credentials: true, origin: "http://localhost:3000" }));
+app.use(cors({ credentials: true, origin: process.env.CLIENT_URL }));
 app.use(express.json());
 
 app.get("/", (req: Request, res: Response) => {
