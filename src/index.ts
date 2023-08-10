@@ -64,7 +64,7 @@ app.post("/signup", async (req: Request, res: Response) => {
 
     res
       .cookie("accessToken", accessToken, {
-        httpOnly: true,
+        httpOnly: false,
         secure: false,
         sameSite: "none",
         expires: new Date(Date.now() + 900000),
@@ -117,7 +117,7 @@ app.post("/login", async (req: Request, res: Response) => {
 
     res
       .cookie("accessToken", accessToken, {
-        httpOnly: true,
+        httpOnly: false,
         secure: false,
         sameSite: "none",
         expires: new Date(Date.now() + 900000),
@@ -178,7 +178,7 @@ app.get(
     });
 
     res.cookie("accessToken", accessToken, {
-      httpOnly: true,
+      httpOnly: false,
       secure: false,
       sameSite: "none",
       expires: new Date(Date.now() + 900000),
