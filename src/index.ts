@@ -67,6 +67,7 @@ app.post("/signup", async (req: Request, res: Response) => {
         httpOnly: true,
         secure: false,
         sameSite: "none",
+        expires: new Date(Date.now() + 900000),
       })
       .status(201)
       .send("User signed up");
@@ -119,6 +120,7 @@ app.post("/login", async (req: Request, res: Response) => {
         httpOnly: true,
         secure: false,
         sameSite: "none",
+        expires: new Date(Date.now() + 900000),
       })
       .status(201)
       .send("User logged in");
@@ -179,6 +181,7 @@ app.get(
       httpOnly: true,
       secure: false,
       sameSite: "none",
+      expires: new Date(Date.now() + 900000),
     });
     res.redirect(process.env.CLIENT_URL!);
   }
