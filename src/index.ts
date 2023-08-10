@@ -6,6 +6,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import cors from "cors";
 import passport from "./middleware/auth";
+import session from "express-session";
+const cookieParser = require("cookie-parser");
 
 import { User } from "@prisma/client";
 
@@ -15,6 +17,19 @@ const prisma = new PrismaClient();
 app.use(passport.initialize());
 app.use(cors({ credentials: true, origin: process.env.CLIENT_URL }));
 app.use(express.json());
+app.use(cookieParser());
+
+// Fix this for prod environments
+app.use(
+  session({
+    secret: "mySecret",
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false },
+  })
+);
+
+app.use(passport.session());
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Homepage");
@@ -47,9 +62,10 @@ app.post("/signup", async (req: Request, res: Response) => {
       },
     });
 
-    // Add http only to this later
-    res.cookie("accessToken", accessToken, {});
-    res.status(201).json({ accessToken });
+    res
+      .cookie("accessToken", accessToken, { httpOnly: true, secure: false })
+      .status(201)
+      .send("User signed up");
   } catch (error) {
     console.log("SIGN UP ERROR:", error);
     res.status(500).send(error);
@@ -74,7 +90,8 @@ app.post("/login", async (req: Request, res: Response) => {
       throw new Error("Invalid credentials");
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+    // Should throw a 500 if the password isn't there
+    const isPasswordValid = await bcrypt.compare(password, user.passwordHash!);
     if (!isPasswordValid) {
       return res.status(400).send("Invalid password");
     }
@@ -93,9 +110,10 @@ app.post("/login", async (req: Request, res: Response) => {
       },
     });
 
-    // Add http only to this later
-    res.cookie("accessToken", accessToken, {});
-    res.status(200).json({ accessToken });
+    res
+      .cookie("accessToken", accessToken, { httpOnly: true, secure: false })
+      .status(201)
+      .send("User logged in");
   } catch (error) {
     res.status(500).send(error);
   }
@@ -103,7 +121,7 @@ app.post("/login", async (req: Request, res: Response) => {
 
 app.get(
   "/users/current",
-  passport.authenticate("bearer", { session: false }),
+  passport.authenticate("cookie", { session: false }),
   async (req: Request, res: Response) => {
     const reqUser = req.user as User;
     try {
@@ -122,6 +140,35 @@ app.get(
     } catch (error) {
       res.status(500).json({ error: "Error occurred while retrieving user" });
     }
+  }
+);
+
+app.get(
+  "/auth/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+app.get(
+  "/auth/google/callback",
+  passport.authenticate("google", {
+    failureRedirect: "/login",
+  }),
+  async (req, res) => {
+    const user = req.user as User;
+    const accessToken = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, {
+      expiresIn: "1h",
+    });
+    await prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        accessToken: accessToken,
+      },
+    });
+
+    res.cookie("accessToken", accessToken, { httpOnly: true, secure: false });
+    res.redirect(process.env.CLIENT_URL!);
   }
 );
 
