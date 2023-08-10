@@ -3,6 +3,7 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as CookieStrategy } from "passport-cookie";
 
 import { PrismaClient } from "@prisma/client";
+import e from "express";
 
 const prisma = new PrismaClient();
 
@@ -16,11 +17,14 @@ passport.use(
             accessToken: token,
           },
         });
+        console.log("Found user: ", user);
         if (!user) {
+          console.log("Failed to find user");
           return done(null, false);
         }
         return done(null, user, { scope: "all" });
       } catch (error) {
+        console.log("Error occurred while authenticating user: ", error);
         return done(error);
       }
     }
