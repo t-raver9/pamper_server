@@ -63,7 +63,11 @@ app.post("/signup", async (req: Request, res: Response) => {
     });
 
     res
-      .cookie("accessToken", accessToken, { httpOnly: true, secure: false })
+      .cookie("accessToken", accessToken, {
+        httpOnly: true,
+        secure: false,
+        sameSite: "none",
+      })
       .status(201)
       .send("User signed up");
   } catch (error) {
@@ -111,7 +115,11 @@ app.post("/login", async (req: Request, res: Response) => {
     });
 
     res
-      .cookie("accessToken", accessToken, { httpOnly: true, secure: false })
+      .cookie("accessToken", accessToken, {
+        httpOnly: true,
+        secure: false,
+        sameSite: "none",
+      })
       .status(201)
       .send("User logged in");
   } catch (error) {
@@ -167,7 +175,11 @@ app.get(
       },
     });
 
-    res.cookie("accessToken", accessToken, { httpOnly: true, secure: false });
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "none",
+    });
     res.redirect(process.env.CLIENT_URL!);
   }
 );
