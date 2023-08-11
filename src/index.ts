@@ -68,7 +68,6 @@ app.post("/signup", async (req: Request, res: Response) => {
         secure: true,
         sameSite: "none",
         expires: new Date(Date.now() + 900000),
-        domain: process.env.CLIENT_DOMAIN,
       })
       .status(201)
       .send("User signed up");
@@ -122,7 +121,6 @@ app.post("/login", async (req: Request, res: Response) => {
         secure: true,
         sameSite: "none",
         expires: new Date(Date.now() + 900000),
-        domain: process.env.CLIENT_DOMAIN,
       })
       .status(201)
       .send("User logged in");
@@ -184,7 +182,6 @@ app.get(
       secure: true,
       sameSite: "none",
       expires: new Date(Date.now() + 900000),
-      domain: process.env.CLIENT_DOMAIN,
     });
     res.redirect(process.env.CLIENT_URL!);
   }
