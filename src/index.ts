@@ -25,7 +25,7 @@ app.use(
     secret: "mySecret",
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false },
+    cookie: { secure: true },
   })
 );
 
@@ -64,8 +64,8 @@ app.post("/signup", async (req: Request, res: Response) => {
 
     res
       .cookie("accessToken", accessToken, {
-        httpOnly: false,
-        secure: false,
+        httpOnly: true,
+        secure: true,
         sameSite: "none",
         expires: new Date(Date.now() + 900000),
       })
@@ -117,8 +117,8 @@ app.post("/login", async (req: Request, res: Response) => {
 
     res
       .cookie("accessToken", accessToken, {
-        httpOnly: false,
-        secure: false,
+        httpOnly: true,
+        secure: true,
         sameSite: "none",
         expires: new Date(Date.now() + 900000),
       })
@@ -178,8 +178,8 @@ app.get(
     });
 
     res.cookie("accessToken", accessToken, {
-      httpOnly: false,
-      secure: false,
+      httpOnly: true,
+      secure: true,
       sameSite: "none",
       expires: new Date(Date.now() + 900000),
     });
