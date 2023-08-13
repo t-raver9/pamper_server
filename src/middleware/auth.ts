@@ -3,7 +3,6 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as CookieStrategy } from "passport-cookie";
 
 import { PrismaClient } from "@prisma/client";
-import e from "express";
 
 const prisma = new PrismaClient();
 
@@ -32,10 +31,12 @@ passport.use(
 );
 
 passport.serializeUser(function (user: any, done) {
+  console.log("Serializing user: ", user);
   done(null, user.id);
 });
 
 passport.deserializeUser(async (id, done) => {
+  console.log("Deserializing user ID: ", id);
   try {
     const user = await prisma.user.findUnique({
       where: {
