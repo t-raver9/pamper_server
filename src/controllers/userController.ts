@@ -8,13 +8,16 @@ const prisma = new PrismaClient();
 
 export const signup = async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role, firstName, lastName } = req.body;
     const passwordHash = await bcrypt.hash(password, 10);
 
     const user = await prisma.user.create({
       data: {
         email: email,
         passwordHash: passwordHash,
+        role: role,
+        firstName: firstName,
+        lastName: lastName,
       },
     });
 
@@ -48,7 +51,7 @@ export const signup = async (req: Request, res: Response) => {
 
 export const login = async (req: Request, res: Response) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, role } = req.body;
 
     const user = await prisma.user.findUnique({
       where: {
@@ -65,9 +68,19 @@ export const login = async (req: Request, res: Response) => {
       return res.status(400).send("Invalid password");
     }
 
-    const accessToken = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, {
-      expiresIn: "1h",
-    });
+    if (user.role !== role) {
+      return res.status(401).send("User role does not match");
+    }
+
+    const accessToken = jwt.sign(
+      {
+        userId: user.id,
+      },
+      process.env.JWT_SECRET!,
+      {
+        expiresIn: "1h",
+      }
+    );
 
     await prisma.user.update({
       where: {
@@ -86,8 +99,9 @@ export const login = async (req: Request, res: Response) => {
         expires: new Date(Date.now() + 900000),
       })
       .status(201)
-      .send("User logged in");
+      .send(user);
   } catch (error) {
+    console.error("LOGIN ERROR:", error);
     res.status(500).send(error);
   }
 };
@@ -117,6 +131,8 @@ export const googleAuth = passport.authenticate("google", {
 
 export const googleAuthCallback = async (req: Request, res: Response) => {
   const user = req.user as User;
+  console.log("CALLBACK QUERY: ", req.query);
+  console.log("USER:", user);
   const accessToken = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, {
     expiresIn: "1h",
   });
@@ -127,6 +143,8 @@ export const googleAuthCallback = async (req: Request, res: Response) => {
     },
     data: {
       accessToken: accessToken,
+      firstName: user.firstName,
+      lastName: user.lastName,
     },
   });
 
@@ -136,5 +154,5 @@ export const googleAuthCallback = async (req: Request, res: Response) => {
     sameSite: "none",
     expires: new Date(Date.now() + 900000),
   });
-  res.redirect(process.env.CLIENT_URL!);
+  res.redirect(process.env.CLIENT_URL! + "/?auth=success");
 };
