@@ -77,8 +77,6 @@ passport.use(
 
           const { role } = JSON.parse(Buffer.from(state, "base64").toString());
 
-          console.log("ROLE: ", role);
-
           user = await prisma.user.create({
             data: {
               googleId: profile.id,

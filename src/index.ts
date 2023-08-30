@@ -4,6 +4,8 @@ import cors from "cors";
 import userRoutes from "./routes/userRoutes";
 import session from "express-session";
 import passport from "./middleware/auth";
+import categoryRoutes from "./routes/categoryRoutes";
+
 const cookieParser = require("cookie-parser");
 
 const app: Express = express();
@@ -26,6 +28,7 @@ app.use(passport.session());
 
 // Routes
 app.use("/", userRoutes);
+app.use("/categories", categoryRoutes);
 
 app.listen(config.server.port, () => {
   console.log(`[server]: Server is running on ${config.server.port}`);

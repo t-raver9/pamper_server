@@ -32,14 +32,15 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   role Role
-  VenueAdmin    VenueAdmin[]
+  VenueAdmin VenueAdmin[]
 }
 
 model Venue {
   id String @id @default(uuid())
   businessName String
   isSoleTrader Boolean @default(false)
-  VenueAdmin VenueAdmin[] 
+  VenueAdmin VenueAdmin[]
+  Service Service[]
 }
 
 model VenueAdmin {
@@ -48,4 +49,32 @@ model VenueAdmin {
   venueId String
   user User @relation(fields: [userId], references: [id])
   venue Venue @relation(fields: [venueId], references: [id])
+}
+
+model Category {
+  id Int @id @default(autoincrement())
+  name String
+  SubCategory SubCategory[]
+  Service Service[]
+}
+
+model SubCategory {
+  id Int @id @default(autoincrement())
+  name String
+  categoryId Int
+  category Category @relation(fields: [categoryId], references: [id])
+  Service Service[]
+}
+
+model Service {
+  id Int @id @default(autoincrement())
+  description String
+  price Float
+  duration Int
+  venueId String
+  venue Venue @relation(fields: [venueId], references: [id])
+  categoryId Int
+  category Category @relation(fields: [categoryId], references: [id])
+  subCategoryId Int
+  subCategory SubCategory @relation(fields: [subCategoryId], references: [id])
 }
