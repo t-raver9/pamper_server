@@ -32,4 +32,20 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   role Role
+  VenueAdmin    VenueAdmin[]
+}
+
+model Venue {
+  id String @id @default(uuid())
+  businessName String
+  isSoleTrader Boolean @default(false)
+  VenueAdmin VenueAdmin[] 
+}
+
+model VenueAdmin {
+  id String @id @default(uuid())
+  userId String
+  venueId String
+  user User @relation(fields: [userId], references: [id])
+  venue Venue @relation(fields: [venueId], references: [id])
 }

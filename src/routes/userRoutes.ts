@@ -18,7 +18,7 @@ router.get(
   passport.authenticate("cookie", { session: false }),
   getCurrentUser
 );
-router.get("/auth/google", (req, res, next) => {
+router.get("/auth/google/signup", (req, res, next) => {
   const { role } = req.query;
   const state = role
     ? Buffer.from(JSON.stringify({ role })).toString("base64")
@@ -29,6 +29,12 @@ router.get("/auth/google", (req, res, next) => {
     state,
   });
 
+  authenticator(req, res, next);
+});
+router.get("/auth/google/login", (req, res, next) => {
+  const authenticator = passport.authenticate("google", {
+    scope: ["profile", "email"],
+  });
   authenticator(req, res, next);
 });
 

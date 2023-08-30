@@ -1,31 +1,58 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { PrismaClient, User } from "@prisma/client";
+import { PrismaClient, Role, User } from "@prisma/client";
 import passport from "../middleware/auth";
 
 const prisma = new PrismaClient();
 
 export const signup = async (req: Request, res: Response) => {
   try {
-    const { email, password, role, firstName, lastName } = req.body;
+    const { email, password, role, firstName, lastName, businessName } =
+      req.body;
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const user = await prisma.user.create({
+    let user = await prisma.user.create({
       data: {
         email: email,
         passwordHash: passwordHash,
-        role: role,
+        role: role as Role,
         firstName: firstName,
         lastName: lastName,
       },
     });
 
+    // If role is related to a business, then create a Venue and VenueAdmin
+    if (
+      role === "PROVIDER_ADMIN" ||
+      role === "VENUE_ADMIN" ||
+      role === "SOLE_TRADER"
+    ) {
+      const venueData: any = {
+        businessName: businessName,
+      };
+
+      if (role === "SOLE_TRADER") {
+        venueData.isSoleTrader = true;
+      }
+
+      const venue = await prisma.venue.create({
+        data: venueData,
+      });
+
+      await prisma.venueAdmin.create({
+        data: {
+          userId: user.id,
+          venueId: venue.id,
+        },
+      });
+    }
+
     const accessToken = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, {
       expiresIn: "1h",
     });
 
-    await prisma.user.update({
+    user = await prisma.user.update({
       where: {
         id: user.id,
       },
@@ -42,7 +69,7 @@ export const signup = async (req: Request, res: Response) => {
         expires: new Date(Date.now() + 900000),
       })
       .status(201)
-      .send("User signed up");
+      .send(user);
   } catch (error) {
     console.error("SIGN UP ERROR:", error);
     res.status(500).send(error);
@@ -51,7 +78,7 @@ export const signup = async (req: Request, res: Response) => {
 
 export const login = async (req: Request, res: Response) => {
   try {
-    const { email, password, role } = req.body;
+    const { email, password } = req.body;
 
     const user = await prisma.user.findUnique({
       where: {
@@ -66,10 +93,6 @@ export const login = async (req: Request, res: Response) => {
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash!);
     if (!isPasswordValid) {
       return res.status(400).send("Invalid password");
-    }
-
-    if (user.role !== role) {
-      return res.status(401).send("User role does not match");
     }
 
     const accessToken = jwt.sign(
