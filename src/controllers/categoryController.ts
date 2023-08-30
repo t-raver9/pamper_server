@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 export const getCategories = async (req: Request, res: Response) => {
   try {
-    const categories = await prisma.category.findMany({
+    const rawCategories = await prisma.category.findMany({
       select: {
         id: true,
         name: true,
@@ -17,6 +17,13 @@ export const getCategories = async (req: Request, res: Response) => {
         },
       },
     });
+
+    // Reshaping the data to change the key from 'SubCategory' to 'subCategories'
+    const categories = rawCategories.map((category) => ({
+      ...category,
+      subCategories: category.SubCategory,
+      SubCategory: undefined,
+    }));
 
     res.status(200).json(categories);
   } catch (error) {
