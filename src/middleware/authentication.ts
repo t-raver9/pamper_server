@@ -2,7 +2,7 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as CookieStrategy } from "passport-cookie";
 
-import { PrismaClient, Role } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import { Request } from "express";
 
 const prisma = new PrismaClient();
@@ -25,6 +25,7 @@ passport.use(
           return done(null, false);
         }
         if (user.role !== role) {
+          console.log("Current role: ", role);
           console.log("User role does not match");
           return done(null, false);
         }
@@ -50,6 +51,7 @@ passport.deserializeUser(async (id, done) => {
         id: id as string,
       },
     });
+    console.log("Deserialized user: ", user);
     done(null, user);
   } catch (error) {
     done(error);
@@ -64,7 +66,7 @@ passport.use(
       callbackURL: `${process.env.SERVER_URL}/auth/google/callback`,
       passReqToCallback: true,
     },
-    async (req, accessToken, refreshToken, profile, done) => {
+    async (req, _accessToken, _refreshToken, profile, done) => {
       try {
         let user = await prisma.user.findUnique({
           where: {

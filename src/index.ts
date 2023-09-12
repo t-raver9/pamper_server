@@ -1,10 +1,12 @@
 import express, { Express } from "express";
 import { config } from "./config";
 import cors from "cors";
-import userRoutes from "./routes/userRoutes";
+import userRoutes from "./routes/users";
 import session from "express-session";
-import passport from "./middleware/auth";
-import categoryRoutes from "./routes/categoryRoutes";
+import passport from "./middleware/authentication";
+import categoryRoutes from "./routes/categories";
+import venueRoutes from "./routes/venues";
+import authenticationRoutes from "./routes/authentication";
 
 const cookieParser = require("cookie-parser");
 
@@ -27,8 +29,10 @@ app.use(
 app.use(passport.session());
 
 // Routes
-app.use("/", userRoutes);
+app.use("/auth", authenticationRoutes);
+app.use("/users", userRoutes);
 app.use("/categories", categoryRoutes);
+app.use("/venues", venueRoutes);
 
 app.listen(config.server.port, () => {
   console.log(`[server]: Server is running on ${config.server.port}`);
