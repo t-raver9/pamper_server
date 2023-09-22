@@ -22,3 +22,52 @@ export const createService = (
     },
   });
 };
+
+export const deleteServiceByServiceId = (
+  prismaClient: PrismaClient,
+  serviceId: string
+): Prisma.PrismaPromise<ServiceDTO> => {
+  return prismaClient.service.delete({
+    where: {
+      id: parseInt(serviceId),
+    },
+  });
+};
+
+export const listServicesQuery = (
+  prismaClient: PrismaClient,
+  options: {
+    page: number;
+    limit: number;
+    categoryId?: number;
+    subCategoryId?: number;
+  }
+): Prisma.PrismaPromise<ServiceDTO[]> => {
+  const skip = (options.page - 1) * options.limit;
+  const take = options.limit;
+
+  return prismaClient.service.findMany({
+    skip,
+    take,
+    where: {
+      ...(options.categoryId && { categoryId: options.categoryId }),
+      ...(options.subCategoryId && { subCategoryId: options.subCategoryId }),
+    },
+  });
+};
+
+// Used to calculate total pages for pagination
+export const countServices = (
+  prismaClient: PrismaClient,
+  options: {
+    categoryId?: number;
+    subCategoryId?: number;
+  }
+): Prisma.PrismaPromise<number> => {
+  return prismaClient.service.count({
+    where: {
+      ...(options.categoryId && { categoryId: options.categoryId }),
+      ...(options.subCategoryId && { subCategoryId: options.subCategoryId }),
+    },
+  });
+};

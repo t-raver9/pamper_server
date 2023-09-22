@@ -49,3 +49,21 @@ export const validatePostServiceForVenue = (
 
   next();
 };
+
+export const validateDeleteServiceForVenue = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { venueId, serviceId } = req.params;
+
+  if (!venueId) {
+    return res.status(400).json({ error: "Missing venue ID" });
+  }
+
+  if (!serviceId) {
+    return res.status(400).json({ error: "Missing service ID" });
+  }
+
+  next();
+};

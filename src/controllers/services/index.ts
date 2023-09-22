@@ -1,11 +1,18 @@
 import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
-import { createService, getAllServicesForVenue } from "./queries";
+import {
+  countServices,
+  createService,
+  deleteServiceByServiceId,
+  getAllServicesForVenue,
+  listServicesQuery,
+} from "./queries";
 import { MutateServiceDTO } from "./types";
+import { transformToPaginatedServicesDTO } from "./transformer";
 
 const prisma = new PrismaClient();
 
-export const listServices = async (req: Request, res: Response) => {
+export const listServicesForVenue = async (req: Request, res: Response) => {
   const { venueId } = req.params;
 
   try {
@@ -36,5 +43,62 @@ export const postService = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Error creating service: ", error);
     return res.status(500).json({ error: "Error creating service" });
+  }
+};
+
+export const deleteService = async (req: Request, res: Response) => {
+  const { serviceId } = req.params;
+
+  try {
+    await deleteServiceByServiceId(prisma, serviceId);
+    res.status(200).json({ message: "Service deleted" });
+  } catch (error) {
+    console.error("Error deleting service: ", error);
+    return res.status(500).json({ error: "Error deleting service" });
+  }
+};
+
+export const listServices = async (req: Request, res: Response) => {
+  const {
+    page = "1",
+    limit = "10",
+    categoryId,
+    subCategoryId,
+  } = req.query as {
+    page?: string;
+    limit?: string;
+    categoryId?: string;
+    subCategoryId?: string;
+  };
+
+  const parsedCategoryId = categoryId ? parseInt(categoryId) : undefined;
+  const parsedSubCategoryId = subCategoryId
+    ? parseInt(subCategoryId)
+    : undefined;
+
+  try {
+    const services = await listServicesQuery(prisma, {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      categoryId: parsedCategoryId ? parsedCategoryId : undefined,
+      subCategoryId: parsedSubCategoryId ? parsedSubCategoryId : undefined,
+    });
+
+    const totalRecords = await countServices(prisma, {
+      categoryId: parsedCategoryId ? parsedCategoryId : undefined,
+      subCategoryId: parsedSubCategoryId ? parsedSubCategoryId : undefined,
+    });
+
+    const totalPages = Math.ceil(totalRecords / parseInt(limit));
+
+    const transformedData = transformToPaginatedServicesDTO({
+      services,
+      currentPage: parseInt(page),
+      totalPages,
+    });
+
+    res.status(200).json(transformedData);
+  } catch (error) {
+    return res.status(500).json({ error: "Error listing services" });
   }
 };
