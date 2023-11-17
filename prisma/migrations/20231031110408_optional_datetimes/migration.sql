@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "BusinessHours" ALTER COLUMN "open" DROP NOT NULL,
+ALTER COLUMN "close" DROP NOT NULL;

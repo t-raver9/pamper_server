@@ -41,6 +41,8 @@ model Venue {
   isSoleTrader Boolean @default(false)
   VenueAdmin VenueAdmin[]
   Service Service[]
+  BusinessHours BusinessHours[]
+  HolidayDays HolidayDays[]
 }
 
 model VenueAdmin {
@@ -77,4 +79,32 @@ model Service {
   category Category @relation(fields: [categoryId], references: [id])
   subCategoryId Int
   subCategory SubCategory @relation(fields: [subCategoryId], references: [id])
+}
+
+enum Weekday {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+model BusinessHours {
+  id      String   @id @default(uuid())
+  weekday Weekday
+  open    String?
+  close   String?
+  closed  Boolean  @default(false)
+  venueId String
+  venue   Venue @relation(fields: [venueId], references: [id])
+}
+
+model HolidayDays {
+  id      String   @id @default(uuid())
+  date    DateTime
+  name    String?  // Optional name for the holiday
+  venueId String
+  venue   Venue @relation(fields: [venueId], references: [id])
 }

@@ -4,10 +4,12 @@ import {
   listServicesForVenue,
   postService,
 } from "../../controllers/services";
+import { getVenueHours, setVenueHours } from "../../controllers/venues";
 import {
   validateDeleteServiceForVenue,
   validateListServicesForVenue,
   validatePostServiceForVenue,
+  validateSetVenueHours,
 } from "./vaildators";
 
 const router = express.Router();
@@ -23,5 +25,7 @@ router.delete(
   validateDeleteServiceForVenue,
   deleteService
 );
+router.post("/:venueId/hours", validateSetVenueHours, setVenueHours);
+router.get("/:venueId/hours", getVenueHours);
 
 export default router;
