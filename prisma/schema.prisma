@@ -43,6 +43,16 @@ model Venue {
   Service Service[]
   BusinessHours BusinessHours[]
   HolidayDays HolidayDays[]
+  Address Address?
+}
+
+model Address {
+  id String @id @default(uuid())
+  address String 
+  lat Float
+  long Float
+  venueId String @unique
+  venue Venue @relation(fields: [venueId], references: [id])
 }
 
 model VenueAdmin {

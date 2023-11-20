@@ -1,13 +1,16 @@
 import express from "express";
 import {
   deleteService,
+  getVenueAddress,
   listServicesForVenue,
+  postAddressForService,
   postService,
 } from "../../controllers/services";
 import { getVenueHours, setVenueHours } from "../../controllers/venues";
 import {
   validateDeleteServiceForVenue,
   validateListServicesForVenue,
+  validatePostAddress,
   validatePostServiceForVenue,
   validateSetVenueHours,
 } from "./vaildators";
@@ -27,5 +30,7 @@ router.delete(
 );
 router.post("/:venueId/hours", validateSetVenueHours, setVenueHours);
 router.get("/:venueId/hours", getVenueHours);
+router.post("/:venueId/address", validatePostAddress, postAddressForService);
+router.get("/:venueId/address", getVenueAddress);
 
 export default router;

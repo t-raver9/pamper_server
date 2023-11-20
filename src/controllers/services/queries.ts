@@ -1,5 +1,5 @@
 import { Prisma, PrismaClient } from "@prisma/client";
-import { MutateServiceDTO, ServiceDTO } from "./types";
+import { MutateServiceDTO, ServiceDTO, UpsertAddressDTO } from "./types";
 
 export const getAllServicesForVenue = (
   prismaClient: PrismaClient,
@@ -68,6 +68,34 @@ export const countServices = (
     where: {
       ...(options.categoryId && { categoryId: options.categoryId }),
       ...(options.subCategoryId && { subCategoryId: options.subCategoryId }),
+    },
+  });
+};
+
+export const upsertAddressForService = (
+  prismaClient: PrismaClient,
+  dto: UpsertAddressDTO
+) => {
+  return prismaClient.address.upsert({
+    where: {
+      venueId: dto.venueId,
+    },
+    update: {
+      ...dto,
+    },
+    create: {
+      ...dto,
+    },
+  });
+};
+
+export const getVenueAddressQuery = (
+  prismaClient: PrismaClient,
+  venueId: string
+) => {
+  return prismaClient.address.findFirst({
+    where: {
+      venueId: venueId,
     },
   });
 };

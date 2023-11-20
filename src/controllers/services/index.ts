@@ -5,10 +5,13 @@ import {
   createService,
   deleteServiceByServiceId,
   getAllServicesForVenue,
+  getVenueAddressQuery,
   listServicesQuery,
+  upsertAddressForService,
 } from "./queries";
-import { MutateServiceDTO } from "./types";
+import { FullAddressDTO, MutateServiceDTO, UpsertAddressDTO } from "./types";
 import { transformToPaginatedServicesDTO } from "./transformer";
+import { stringToFloat } from "../../utils";
 
 const prisma = new PrismaClient();
 
@@ -100,5 +103,45 @@ export const listServices = async (req: Request, res: Response) => {
     res.status(200).json(transformedData);
   } catch (error) {
     return res.status(500).json({ error: "Error listing services" });
+  }
+};
+
+export const postAddressForService = async (req: Request, res: Response) => {
+  const { venueId } = req.params;
+  let { address, lat, long, id } = req.body;
+
+  try {
+    // Need a module for this kidna thing
+    lat = stringToFloat(lat);
+    long = stringToFloat(long);
+
+    const dto: UpsertAddressDTO = {
+      id,
+      address,
+      lat,
+      long,
+      venueId,
+    };
+
+    const newAddress: FullAddressDTO = await upsertAddressForService(
+      prisma,
+      dto
+    );
+    res.status(200).json(newAddress);
+  } catch (error) {
+    console.error("Error creating address: ", error);
+    return res.status(500).json({ error: "Error creating address" });
+  }
+};
+
+export const getVenueAddress = async (req: Request, res: Response) => {
+  const { venueId } = req.params;
+
+  try {
+    const address = await getVenueAddressQuery(prisma, venueId);
+    res.status(200).json(address);
+  } catch (error) {
+    console.error("Error getting address: ", error);
+    return res.status(500).json({ error: "Error getting address" });
   }
 };

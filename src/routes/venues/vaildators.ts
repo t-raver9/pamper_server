@@ -78,9 +78,6 @@ export const validateSetVenueHours = (
   const { venueId } = req.params;
   const { businessHours, holidayDays } = req.body;
 
-  console.log("Regular hours:", businessHours);
-  console.log("holidayDays:", holidayDays);
-
   if (!venueId) {
     return res.status(400).json({ error: "Missing venue ID" });
   }
@@ -103,6 +100,31 @@ export const validateSetVenueHours = (
     if (!isValidWeekday(day)) {
       return res.status(400).json({ error: `Invalid weekday: ${day}` });
     }
+  }
+
+  next();
+};
+
+export const validatePostAddress = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { venueId } = req.params;
+  const { address, lat, long } = req.body;
+
+  console.log("address, lat, long", address, lat, long);
+
+  if (!venueId) {
+    return res.status(400).json({ error: "Missing venue ID" });
+  }
+
+  if (!address) {
+    return res.status(400).json({ error: "Missing address" });
+  }
+
+  if (!lat || !long) {
+    return res.status(400).json({ error: "Missing lat or long" });
   }
 
   next();
