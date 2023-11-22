@@ -6,10 +6,15 @@ import {
   postAddressForService,
   postService,
 } from "../../controllers/services";
-import { getVenueHours, setVenueHours } from "../../controllers/venues";
+import {
+  getVenueHours,
+  listVenuesInBounds,
+  setVenueHours,
+} from "../../controllers/venues";
 import {
   validateDeleteServiceForVenue,
   validateListServicesForVenue,
+  validateListVenuesInBounds,
   validatePostAddress,
   validatePostServiceForVenue,
   validateSetVenueHours,
@@ -17,6 +22,7 @@ import {
 
 const router = express.Router();
 
+router.get("/in-bounds", validateListVenuesInBounds, listVenuesInBounds);
 router.get(
   "/:venueId/services",
   validateListServicesForVenue,

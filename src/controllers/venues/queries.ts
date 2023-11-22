@@ -5,6 +5,35 @@ import { BusinessHoursDTO, HolidayDaysDTO } from "./types";
 
 const prisma = new PrismaClient();
 
+export const getVenuesInBounds = (
+  prisma: PrismaClient,
+  bounds: {
+    north: number;
+    south: number;
+    east: number;
+    west: number;
+  }
+) => {
+  console.log(bounds);
+  return prisma.venue.findMany({
+    where: {
+      Address: {
+        lat: {
+          gte: bounds.south,
+          lte: bounds.north,
+        },
+        long: {
+          gte: bounds.west,
+          lte: bounds.east,
+        },
+      },
+    },
+    include: {
+      Address: true,
+    },
+  });
+};
+
 export const setVenueBusinessHours = async (
   venueId: string,
   businessHours: BusinessHoursDTO[]

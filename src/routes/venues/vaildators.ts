@@ -130,6 +130,19 @@ export const validatePostAddress = (
   next();
 };
 
+export const validateListVenuesInBounds = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const { north, south, east, west } = req.query;
+  if (!north || !south || !east || !west) {
+    return res.status(400).json({ error: "Missing bounds" });
+  }
+
+  next();
+};
+
 const isValidWeekday = (value: string): value is Weekday => {
   return Object.values(Weekday).includes(value as Weekday);
 };
